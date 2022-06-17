@@ -1,19 +1,16 @@
-FROM node:16
+FROM node:14.15.4 as base
 
-# Create app directory
-WORKDIR /usr/src/app
+WORKDIR /code
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json ./
+COPY package.json package.json
+COPY package-lock.json package-lock.json
 
-RUN npm install
-# If you are building your code for production
-# RUN npm ci --only=production
-
-# Bundle app source
+FROM base as test
+RUN npm ci
 COPY . .
+RUN npm run test
 
-EXPOSE 8080
+FROM base as prod
+RUN npm ci --production
+COPY . .
 CMD [ "node", "server.js" ]
